@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shiva Enterprises | Electrical | IT Services | Home Automation | CCTV Solutions</title>
+<meta name="description" content="Shiva Enterprises provides Electrical Contracting, Home Automation, CCTV Solutions, IT Infrastructure, Energy Monitoring Systems, MCBs, Wires, Switches, Lighting and Industrial Electrical Products.">
+<meta name="keywords" content="Electrical Contractor, Electrical Supplier, Home Automation, CCTV Installation, MCB Dealer, Polycab Wire Dealer, GreatWhite Switches, Electrical Material Supplier, Industrial Electrical Services, Networking Solutions, Energy Monitoring Device">
+<meta property="og:title" content="Shiva Enterprises | Smart Engineering for a Greener Tomorrow"><meta property="og:description" content="Electrical, IT, Automation, CCTV, AMC and Energy Efficient Solutions."><meta property="og:type" content="website"><meta property="og:image" content="assets/logo.svg">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Shiva Enterprises"><meta name="twitter:description" content="Electrical | IT Services | Automation | Security Solutions">
+<link rel="stylesheet" href="styles.css"><link rel="icon" href="assets/logo.svg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"Shiva Enterprises","description":"Electrical Contracting, IT Services, Home Automation, CCTV Solutions and Facility Management Services","areaServed":"India","url":"https://example.com","telephone":"+91-XXXXXXXXXX","image":"assets/logo.svg","openingHours":"Mo-Sa 09:00-19:00"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Do you provide electrical installation?","acceptedAnswer":{"@type":"Answer","text":"Yes, we provide supply, installation, testing, commissioning and maintenance for electrical systems."}},{"@type":"Question","name":"Do you provide home automation systems?","acceptedAnswer":{"@type":"Answer","text":"Yes, we provide smart switches, Wi-Fi controls, energy monitoring and smart lighting solutions."}},{"@type":"Question","name":"Can I get bulk discounts?","acceptedAnswer":{"@type":"Answer","text":"Yes, final pricing depends on quantity, brand, availability and installation requirements."}},{"@type":"Question","name":"Do you provide AMC services?","acceptedAnswer":{"@type":"Answer","text":"Yes, we offer Annual Maintenance Contracts and preventive maintenance support."}},{"@type":"Question","name":"Do you install CCTV systems?","acceptedAnswer":{"@type":"Answer","text":"Yes, we supply and install CCTV, access control, biometric and video door phone systems."}},{"@type":"Question","name":"Do you supply branded electrical products?","acceptedAnswer":{"@type":"Answer","text":"Yes, we showcase brands including Polycab, GreatWhite, Havells, Legrand, Schneider, CP Plus and others."}}]}</script>
+</head><body>
+<header class="nav"><a class="brand" href="#"><img src="assets/logo.svg" alt="Shiva Enterprises logo"><span>SMART ENGINEERING FOR A GREENER TOMORROW</span></a><button class="menu" onclick="toggleMenu()">☰</button><nav id="menu"><a href="#services">Services</a><a href="#products">Products</a><a href="#projects">Projects</a><a href="#about">About</a><a href="#contact">Contact</a></nav></header>
+<section class="hero"><div><p class="pill">Electrical • IT • Automation • CCTV • AMC</p><h1>Powering Smart Infrastructure with Innovation & Reliability</h1><p>Shiva Enterprises delivers Electrical, IT, Automation, Security and Energy Efficient Solutions for Residential, Commercial and Industrial Projects.</p><div class="actions"><a class="btn primary" href="#contact">Get Free Quote</a><a class="btn" id="heroWhats" href="#">WhatsApp Now</a><a class="btn" href="tel:+91XXXXXXXXXX">Call Now</a></div></div><div class="hero-card"><b>Smart City Ready</b><span>Power distribution, networking, surveillance, energy monitoring and future-ready automation.</span></div></section>
+<section id="about" class="section"><h2>About Shiva Enterprises</h2><p>Shiva Enterprises is a trusted provider of Electrical Engineering, IT Infrastructure, Home Automation, Security Systems and Energy Management Solutions. We specialize in supply, installation, testing, commissioning and maintenance of electrical and technology systems for homes, offices, commercial buildings and industrial facilities.</p><div class="chips"><span>Experienced Team</span><span>Quality Products</span><span>Competitive Pricing</span><span>Fast Service Support</span><span>Certified Solutions</span><span>End-to-End Project Execution</span><span>Customized Engineering Solutions</span></div></section>
+<section id="services" class="section dark"><h2>Our Services</h2><div class="grid cards">
+<article><div class="icon">⚡</div><h3>Electrical Services</h3><p>Wiring, panels, industrial works, maintenance, transformers, power distribution, earthing and energy audits.</p></article><article><div class="icon">🖧</div><h3>IT Services</h3><p>Networking, server setup, Wi-Fi, data cabling, structured cabling and IT infrastructure.</p></article><article><div class="icon">🛡️</div><h3>Security Solutions</h3><p>CCTV surveillance, access control, video door phones, biometric systems and intercoms.</p></article><article><div class="icon">🏠</div><h3>Automation Solutions</h3><p>Home automation, smart switches, energy monitoring, remote control, lighting and scheduling.</p></article><article><div class="icon">🔧</div><h3>Facility Management</h3><p>AMC services, preventive maintenance, breakdown support and electrical maintenance.</p></article></div></section>
+<section class="offer"><div class="badge">SPECIAL PROMOTIONAL OFFER</div><h2>SMART ENERGY MONITORING OFFER</h2><h3>ENMOD1P – Energy Monitoring Device (Wi‑Fi Enabled)</h3><p>Monitor power consumption in real time, track energy usage remotely, reduce electricity bills and control electrical loads through Wi‑Fi. Ideal for homes, offices, shops and industries.</p><div class="actions"><a class="btn primary" href="#contact">Request Demo</a><a class="btn" href="#contact">Get Offer Price</a><a class="btn" id="offerWhats" href="#">WhatsApp Now</a><a class="btn ghost" href="https://www.youtube.com/watch?v=ZhjxQKF7su8" target="_blank" rel="noopener">Watch Reference Video</a></div></section>
+<section id="products" class="section"><h2>Product Catalogue</h2><p class="note">Wires & Cables and MCBs: 30%–35% discount. Switches, Lighting and Electrical Accessories: up to 40% discount. Final pricing depends on quantity, brand, availability and installation requirements.</p><div class="filters"><input id="search" placeholder="Search products..."><select id="category"><option value="">All Categories</option></select><select id="brand"><option value="">All Brands</option></select><select id="discount"><option value="">Any Discount</option><option value="30">30%+</option><option value="35">35%+</option><option value="40">40%</option></select><input id="maxprice" type="number" placeholder="Max offer price"></div><div id="productGrid" class="grid product-grid"></div></section>
+<section class="section cart"><h2>Enquiry Cart</h2><div id="cartItems"></div><form id="enquiryForm"><input required placeholder="Name"><input placeholder="Company Name"><input required placeholder="Phone Number"><input placeholder="WhatsApp Number"><input type="email" placeholder="Email"><input placeholder="Address"><input placeholder="City"><input placeholder="State"><select><option>Installation Required: Yes</option><option>Installation Required: No</option></select><textarea placeholder="Message"></textarea><button class="btn primary" type="submit">Submit Enquiry</button><a class="btn" id="cartWhats" href="#">WhatsApp Enquiry</a></form></section>
+<section id="projects" class="section dark"><h2>Projects</h2><div class="grid gallery"><div><span>Electrical Projects</span></div><div><span>Industrial Projects</span></div><div><span>Commercial Projects</span></div><div><span>IT Projects</span></div><div><span>Automation Projects</span></div><div><span>Security Projects</span></div></div></section>
+<section class="section"><h2>Brands We Showcase</h2><div class="logos"><b>Polycab</b><b>GreatWhite</b><b>Havells</b><b>Legrand</b><b>Schneider Electric</b><b>Anchor Panasonic</b><b>RR Kabel</b><b>Finolex</b><b>CP Plus</b><b>Hikvision</b><b>Dahua</b><b>TP-Link</b><b>D-Link</b><b>Netgear</b></div></section>
+<section class="section"><h2>Testimonials</h2><div class="grid cards"><article><h3>★★★★★</h3><p>Professional wiring and quick service support for our office project.</p></article><article><h3>★★★★★</h3><p>Good product guidance and neat CCTV installation.</p></article><article><h3>★★★★★</h3><p>Reliable AMC team with prompt breakdown response.</p></article></div></section>
+<section class="section faq"><h2>FAQ</h2><details><summary>Do you provide electrical installation?</summary><p>Yes, we provide complete electrical supply, installation, testing and commissioning.</p></details><details><summary>Do you provide home automation systems?</summary><p>Yes, including smart switches, touch panels, energy monitoring and remote control.</p></details><details><summary>Can I get bulk discounts?</summary><p>Yes. Bulk discounts depend on quantity, brand, availability and installation scope.</p></details><details><summary>Do you provide AMC services?</summary><p>Yes, we provide AMC, preventive maintenance and breakdown support.</p></details><details><summary>Do you install CCTV systems?</summary><p>Yes, we install CCTV, access control, video door phones and biometric systems.</p></details><details><summary>Do you supply branded electrical products?</summary><p>Yes, we supply branded products across wires, MCBs, switches, lighting, CCTV and networking.</p></details></section>
+<section id="contact" class="section contact"><h2>Contact Shiva Enterprises</h2><div class="contact-grid"><div><p><b>Phone:</b> +91-XXXXXXXXXX</p><p><b>WhatsApp:</b> +91-XXXXXXXXXX</p><p><b>Email:</b> info@shivaenterprises.example</p><p><b>Business Hours:</b> Mon–Sat, 9:00 AM–7:00 PM</p><iframe title="Google Maps location placeholder" src="https://www.google.com/maps?q=India&output=embed"></iframe></div><form><input placeholder="Name"><input placeholder="Phone"><input placeholder="Email"><textarea placeholder="How can we help?"></textarea><button class="btn primary">Send Message</button></form></div></section>
+<footer><img src="assets/logo.svg" alt="Shiva Enterprises logo"><p>Electrical | IT Services | Automation | Security Solutions</p><p>SMART ENGINEERING FOR A GREENER TOMORROW</p><p><a href="#products">Products</a> · <a href="#services">Services</a> · <a href="#projects">Projects</a> · <a href="#about">About Us</a> · <a href="#contact">Contact Us</a></p><p>Copyright © Shiva Enterprises. All Rights Reserved.</p></footer><a class="floating whats" id="floatWhats" href="#">WhatsApp</a><a class="floating call" href="tel:+91XXXXXXXXXX">Call</a>
+<script>const PRODUCTS=[
+  {
+    "brand": "GreatWhite",
+    "name": "Arcus 1 Way Switch",
+    "category": "Switches & Sockets",
+    "voltage": "240V",
+    "current": "6A/10A",
+    "material": "Polycarbonate",
+    "applications": "Residential and commercial switching",
+    "warranty": "2 Years",
+    "install": "Modular concealed",
+    "mrp": 520,
+    "discount": 40
+  },
+  {
+    "brand": "GreatWhite",
+    "name": "Trivo Bell Push",
+    "category": "Switches & Sockets",
+    "voltage": "240V",
+    "current": "6A",
+    "material": "Polycarbonate",
+    "applications": "Door bell control",
+    "warranty": "2 Years",
+    "install": "Modular concealed",
+    "mrp": 360,
+    "discount": 40
+  },
+  {
+    "brand": "GreatWhite",
+    "name": "Fiana Universal Socket",
+    "category": "Switches & Sockets",
+    "voltage": "240V",
+    "current": "6A/16A",
+    "material": "Polycarbonate + brass contacts",
+    "applications": "Home and office power outlet",
+    "warranty": "2 Years",
+    "install": "Modular concealed",
+    "mrp": 690,
+    "discount": 38
+  },
+  {
+    "brand": "GreatWhite",
+    "name": "Fan Regulator",
+    "category": "Switches & Sockets",
+    "voltage": "240V",
+    "current": "100W",
+    "material": "FR grade polycarbonate",
+    "applications": "Ceiling fan speed control",
+    "warranty": "2 Years",
+    "install": "Modular concealed",
+    "mrp": 980,
+    "discount": 35
+  },
+  {
+    "brand": "GreatWhite",
+    "name": "USB Charger Module",
+    "category": "Switches & Sockets",
+    "voltage": "5V DC",
+    "current": "2.1A",
+    "material": "Polycarbonate",
+    "applications": "Mobile charging stations",
+    "warranty": "1 Year",
+    "install": "Modular concealed",
+    "mrp": 1250,
+    "discount": 35
+  },
+  {
+    "brand": "GreatWhite",
+    "name": "RJ45 Data Outlet",
+    "category": "Networking Products",
+    "voltage": "Low Voltage",
+    "current": "Cat6",
+    "material": "Polycarbonate + copper contacts",
+    "applications": "LAN networking",
+    "warranty": "1 Year",
+    "install": "Modular concealed",
+    "mrp": 780,
+    "discount": 35
+  },
+  {
+    "brand": "GreatWhite",
+    "name": "WiFi Smart Switch",
+    "category": "Home Automation",
+    "voltage": "110-240V",
+    "current": "10A",
+    "material": "ABS fire-retardant",
+    "applications": "Remote appliance control",
+    "warranty": "1 Year",
+    "install": "Modular/retrofit",
+    "mrp": 2200,
+    "discount": 25
+  },
+  {
+    "brand": "GreatWhite",
+    "name": "Touch Control Panel",
+    "category": "Home Automation",
+    "voltage": "240V",
+    "current": "10A/channel",
+    "material": "Tempered glass",
+    "applications": "Smart home scene control",
+    "warranty": "1 Year",
+    "install": "Wall mounted",
+    "mrp": 6500,
+    "discount": 20
+  },
+  {
+    "brand": "GreatWhite",
+    "name": "LED Panel Light",
+    "category": "Lighting Products",
+    "voltage": "220-240V",
+    "current": "12W/18W",
+    "material": "Aluminium + diffuser",
+    "applications": "Indoor lighting",
+    "warranty": "2 Years",
+    "install": "Recessed/surface",
+    "mrp": 1450,
+    "discount": 40
+  },
+  {
+    "brand": "GreatWhite",
+    "name": "LED Flood Light",
+    "category": "Lighting Products",
+    "voltage": "220-240V",
+    "current": "50W",
+    "material": "Aluminium die-cast",
+    "applications": "Outdoor/security lighting",
+    "warranty": "2 Years",
+    "install": "Wall/pole mounted",
+    "mrp": 3850,
+    "discount": 38
+  },
+  {
+    "brand": "GreatWhite",
+    "name": "MCB SP",
+    "category": "MCB",
+    "voltage": "240/415V",
+    "current": "6A-63A",
+    "material": "Thermoplastic",
+    "applications": "Circuit protection",
+    "warranty": "2 Years",
+    "install": "DIN rail",
+    "mrp": 450,
+    "discount": 35
+  },
+  {
+    "brand": "GreatWhite",
+    "name": "RCCB 4 Pole",
+    "category": "RCCB",
+    "voltage": "240/415V",
+    "current": "25A-63A",
+    "material": "Thermoplastic",
+    "applications": "Shock/leakage protection",
+    "warranty": "2 Years",
+    "install": "DIN rail",
+    "mrp": 2450,
+    "discount": 32
+  },
+  {
+    "brand": "GreatWhite",
+    "name": "Distribution Board",
+    "category": "Distribution Boards",
+    "voltage": "240/415V",
+    "current": "4-16 Way",
+    "material": "Powder coated metal",
+    "applications": "Power distribution",
+    "warranty": "2 Years",
+    "install": "Wall mounted",
+    "mrp": 2800,
+    "discount": 30
+  },
+  {
+    "brand": "GreatWhite",
+    "name": "FRLS House Wire",
+    "category": "Electrical Wires & Cables",
+    "voltage": "1100V",
+    "current": "1.0-6.0 sq.mm",
+    "material": "Copper + FRLS PVC",
+    "applications": "House wiring",
+    "warranty": "As per brand",
+    "install": "Concealed/conduit",
+    "mrp": 3400,
+    "discount": 35
+  },
+  {
+    "brand": "Polycab",
+    "name": "House Wire Coil",
+    "category": "Electrical Wires & Cables",
+    "voltage": "1100V",
+    "current": "1.5 sq.mm",
+    "material": "Copper + PVC insulation",
+    "applications": "Residential wiring",
+    "warranty": "As per brand",
+    "install": "Conduit wiring",
+    "mrp": 3650,
+    "discount": 35
+  },
+  {
+    "brand": "Polycab",
+    "name": "LAN Cable Cat6",
+    "category": "Networking Products",
+    "voltage": "Low Voltage",
+    "current": "Cat6",
+    "material": "Copper conductor + PVC sheath",
+    "applications": "Data networking",
+    "warranty": "As per brand",
+    "install": "Structured cabling",
+    "mrp": 9500,
+    "discount": 30
+  },
+  {
+    "brand": "Polycab",
+    "name": "CCTV Cable 3+1",
+    "category": "CCTV Products",
+    "voltage": "Low Voltage",
+    "current": "Coax + power",
+    "material": "Copper/aluminium as per grade",
+    "applications": "CCTV installation",
+    "warranty": "As per brand",
+    "install": "Surface/conduit",
+    "mrp": 4200,
+    "discount": 30
+  },
+  {
+    "brand": "CP Plus",
+    "name": "Dome CCTV Camera",
+    "category": "CCTV Products",
+    "voltage": "12V DC",
+    "current": "2MP/5MP",
+    "material": "ABS/metal body",
+    "applications": "Indoor surveillance",
+    "warranty": "1-2 Years",
+    "install": "Ceiling mounted",
+    "mrp": 2450,
+    "discount": 20
+  },
+  {
+    "brand": "Hikvision",
+    "name": "Bullet CCTV Camera",
+    "category": "CCTV Products",
+    "voltage": "12V DC/PoE",
+    "current": "2MP/5MP",
+    "material": "Metal weatherproof",
+    "applications": "Outdoor surveillance",
+    "warranty": "1-2 Years",
+    "install": "Wall mounted",
+    "mrp": 3200,
+    "discount": 18
+  },
+  {
+    "brand": "TP-Link",
+    "name": "WiFi Router",
+    "category": "Networking Products",
+    "voltage": "12V DC",
+    "current": "Dual band",
+    "material": "ABS body",
+    "applications": "Office/home WiFi",
+    "warranty": "3 Years",
+    "install": "Desktop/wall",
+    "mrp": 2999,
+    "discount": 15
+  },
+  {
+    "brand": "Schneider Electric",
+    "name": "Isolator",
+    "category": "Isolators",
+    "voltage": "240/415V",
+    "current": "40A-63A",
+    "material": "Thermoplastic",
+    "applications": "Main isolation",
+    "warranty": "2 Years",
+    "install": "DIN rail",
+    "mrp": 1350,
+    "discount": 30
+  },
+  {
+    "brand": "Legrand",
+    "name": "Changeover Switch",
+    "category": "Changeovers",
+    "voltage": "240/415V",
+    "current": "32A-63A",
+    "material": "Engineering plastic",
+    "applications": "Power source switching",
+    "warranty": "2 Years",
+    "install": "Panel/wall",
+    "mrp": 2850,
+    "discount": 28
+  },
+  {
+    "brand": "Havells",
+    "name": "LED Bulb",
+    "category": "Lighting Products",
+    "voltage": "220-240V",
+    "current": "9W/12W",
+    "material": "Polycarbonate",
+    "applications": "Indoor lighting",
+    "warranty": "1 Year",
+    "install": "B22/E27 holder",
+    "mrp": 220,
+    "discount": 40
+  },
+  {
+    "brand": "D-Link",
+    "name": "Patch Panel",
+    "category": "Networking Products",
+    "voltage": "Low Voltage",
+    "current": "24 Port Cat6",
+    "material": "Metal + PCB",
+    "applications": "Rack networking",
+    "warranty": "1 Year",
+    "install": "Rack mounted",
+    "mrp": 6500,
+    "discount": 25
+  }
+];</script><script src="script.js"></script></body></html>

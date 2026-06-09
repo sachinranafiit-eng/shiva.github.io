@@ -1,0 +1,16 @@
+
+const phone="91XXXXXXXXXX";
+let cart=[];
+function wa(text){return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`}
+function toggleMenu(){document.getElementById('menu').classList.toggle('show')}
+function money(n){return "₹"+Math.round(n).toLocaleString("en-IN")}
+function initFilters(){const cats=[...new Set(PRODUCTS.map(p=>p.category))].sort(), brands=[...new Set(PRODUCTS.map(p=>p.brand))].sort(); cats.forEach(x=>category.innerHTML+=`<option>${x}</option>`); brands.forEach(x=>brand.innerHTML+=`<option>${x}</option>`)}
+function renderProducts(){let q=search.value.toLowerCase(), c=category.value,b=brand.value,d=+discount.value,max=+maxprice.value; let list=PRODUCTS.filter(p=>(!q||(p.name+p.brand+p.category).toLowerCase().includes(q))&&(!c||p.category==c)&&(!b||p.brand==b)&&(!d||p.discount>=d)&&(!max||p.mrp*(1-p.discount/100)<=max)); productGrid.innerHTML=list.map((p,i)=>{let offer=p.mrp*(1-p.discount/100);return `<article class="product-card"><div class="img" aria-label="${p.name} product image">⚙️</div><p class="pill">${p.category}</p><h3>${p.brand} ${p.name}</h3><p><b>Technical Data:</b> ${p.voltage}, ${p.current}, ${p.material}</p><p><b>Applications:</b> ${p.applications}</p><p><b>Warranty:</b> ${p.warranty}<br><b>Installation:</b> ${p.install}</p><div class="price"><span class="mrp">${money(p.mrp)}</span><span class="off">${p.discount}% OFF</span><b>${money(offer)}</b></div><div class="qty">Qty <input id="qty-${i}" type="number" min="1" value="1"></div><button class="btn primary" onclick='addToCart(${JSON.stringify(p)}, document.getElementById("qty-${i}").value)'>Add to Enquiry</button><a class="btn" href="#contact">Request Installation</a><a class="btn" target="_blank" href="${wa("Hello Shiva Enterprises, I am interested in "+p.brand+" "+p.name+". Please share your best price and installation charges.")}">WhatsApp Enquiry</a></article>`}).join("")||"<p>No products found.</p>"}
+function addToCart(p,qty){let item=cart.find(x=>x.name==p.name&&x.brand==p.brand); if(item)item.qty+=Number(qty); else cart.push({...p,qty:Number(qty)}); renderCart()}
+function renderCart(){cartItems.innerHTML=cart.map((x,i)=>`<div class="cart-row"><span>${x.brand} ${x.name} × ${x.qty}</span><button onclick="cart.splice(${i},1);renderCart()">Remove</button></div>`).join("")||"<p>No products added yet.</p>"; let list=cart.map(x=>`${x.brand} ${x.name} - Qty: ${x.qty}`).join("%0A"); let msg=`Hello Shiva Enterprises,\n\nI am interested in the following products:\n\n${cart.map(x=>x.brand+" "+x.name).join("\n")}\n\nQuantity:\n${cart.map(x=>x.qty).join(", ")}\n\nPlease share your best price and installation charges.\n\nThank you.`; cartWhats.href=wa(msg)}
+["search","category","brand","discount","maxprice"].forEach(id=>document.getElementById(id).addEventListener("input",renderProducts));
+document.getElementById("enquiryForm").addEventListener("submit",e=>{e.preventDefault(); alert("Thank you! Your enquiry is ready. Please connect by WhatsApp/call or configure this form with your email service.");});
+heroWhats.href=wa("Hello Shiva Enterprises, I want a free quote for electrical/IT/automation/CCTV solutions.");
+offerWhats.href=wa("Hello Shiva Enterprises, I am interested in ENMOD1P Energy Monitoring Device offer. Please share demo and offer price.");
+floatWhats.href=heroWhats.href;
+initFilters(); renderProducts(); renderCart();
