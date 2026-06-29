@@ -1,4 +1,3 @@
 User-agent: *
 Allow: /
-
-Sitemap: https://example.com/sitemap.xml
+Sitemap: https://sachinranafiit-eng.github.io/shiva.github.io/sitemap.xml
