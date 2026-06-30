@@ -27,6 +27,14 @@ const newButton = document.querySelector("[data-new-product]");
 const clearButton = document.querySelector("[data-clear-form]");
 const deleteButton = document.querySelector("[data-delete-product]");
 const duplicateButton = document.querySelector("[data-duplicate-product]");
+const bulkFileInput = document.querySelector("[data-bulk-file]");
+const bulkModeSelect = document.querySelector("[data-bulk-mode]");
+const bulkCategorySelect = document.querySelector("[data-bulk-category]");
+const bulkBrandInput = document.querySelector("[data-bulk-brand]");
+const bulkApplyButton = document.querySelector("[data-apply-bulk]");
+const bulkClearButton = document.querySelector("[data-clear-bulk]");
+const bulkPreview = document.querySelector("[data-bulk-preview]");
+const bulkTemplateButton = document.querySelector("[data-download-bulk-template]");
 
 const publishedProducts = Array.isArray(window.SHIVA_CATALOG_PRODUCTS)
   ? structuredClone(window.SHIVA_CATALOG_PRODUCTS)
@@ -34,6 +42,7 @@ const publishedProducts = Array.isArray(window.SHIVA_CATALOG_PRODUCTS)
 
 let products = loadProducts();
 let selectedId = products[0] ? products[0].id : "";
+let pendingBulkProducts = [];
 
 function loadProducts() {
   try {
@@ -337,6 +346,303 @@ function importJson(file) {
   reader.readAsText(file);
 }
 
+function normalizeHeader(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function getRowValue(row, keys) {
+  const normalizedRow = Object.entries(row).reduce((lookup, [key, value]) => {
+    lookup[normalizeHeader(key)] = value;
+    return lookup;
+  }, {});
+
+  for (const key of keys) {
+    const value = normalizedRow[normalizeHeader(key)];
+    if (value !== undefined && String(value).trim() !== "") return String(value).trim();
+  }
+  return "";
+}
+
+function parseMoney(value) {
+  const cleaned = String(value || "")
+    .replace(/,/g, "")
+    .replace(/[^\d.-]/g, "");
+  return Number(cleaned) || 0;
+}
+
+function parseQuantity(value) {
+  const cleaned = String(value || "")
+    .replace(/,/g, "")
+    .replace(/[^\d.-]/g, "");
+  return Number(cleaned) || 0;
+}
+
+function splitTechnicalData(value) {
+  return String(value || "")
+    .split(/\r?\n|;|\|/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let quoted = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const next = text[index + 1];
+
+    if (char === '"' && quoted && next === '"') {
+      cell += '"';
+      index += 1;
+    } else if (char === '"') {
+      quoted = !quoted;
+    } else if (char === "," && !quoted) {
+      row.push(cell);
+      cell = "";
+    } else if ((char === "\n" || char === "\r") && !quoted) {
+      if (char === "\r" && next === "\n") index += 1;
+      row.push(cell);
+      if (row.some((value) => String(value).trim() !== "")) rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += char;
+    }
+  }
+
+  row.push(cell);
+  if (row.some((value) => String(value).trim() !== "")) rows.push(row);
+  if (!rows.length) return [];
+
+  const headers = rows[0].map((header) => String(header || "").trim());
+  return rows.slice(1).map((values) => headers.reduce((item, header, index) => {
+    item[header || `Column ${index + 1}`] = values[index] || "";
+    return item;
+  }, {}));
+}
+
+function rowsToProducts(rows) {
+  const defaultCategory = bulkCategorySelect ? bulkCategorySelect.value : "Electrical";
+  const defaultBrand = (bulkBrandInput && bulkBrandInput.value.trim()) || "Shiva Enterprises";
+  const usedIds = new Set(products.map((product) => product.id).filter(Boolean));
+  const imported = [];
+  let skipped = 0;
+
+  rows.forEach((row) => {
+    const title = getRowValue(row, ["item", "item name", "product", "product name", "name", "title", "description"]);
+    if (!title) {
+      skipped += 1;
+      return;
+    }
+
+    const unit = getRowValue(row, ["unit", "uom", "unit of measure"]) || "piece";
+    const stockQty = parseQuantity(getRowValue(row, ["qty", "qty.", "quantity", "stock", "stock qty", "stock quantity", "qnty"]));
+    const price = parseMoney(getRowValue(row, ["rate", "price", "mrp", "amount", "unit rate", "selling price"]));
+    const brand = getRowValue(row, ["brand", "make", "company"]) || defaultBrand;
+    const model = getRowValue(row, ["model", "model no", "model number", "sku", "code"]);
+    const category = getRowValue(row, ["category", "type", "group"]) || defaultCategory;
+    const image = getRowValue(row, ["image", "image url", "photo", "picture"]);
+    const badge = getRowValue(row, ["badge", "label", "tag"]);
+    const offer = getRowValue(row, ["offer", "discount", "remark", "remarks", "note"]);
+    const technicalData = getRowValue(row, ["technical data", "technical", "specs", "specification", "specifications"]);
+    const baseId = slugify(`${brand}-${model || title}-${title}`);
+    let id = baseId;
+    let counter = 2;
+
+    while (usedIds.has(id)) {
+      id = `${baseId}-${counter}`;
+      counter += 1;
+    }
+    usedIds.add(id);
+
+    const specs = splitTechnicalData(technicalData);
+    if (!specs.length) {
+      specs.push(`Unit: ${unit}`);
+      if (stockQty) specs.push(`Quantity: ${stockQty}`);
+    }
+
+    const product = {
+      id,
+      category,
+      brand,
+      model,
+      title,
+      price,
+      unit,
+      priceLabel: price ? `${formatPrice(price)} / ${unit}` : "",
+      stockQty,
+      stockStatus: stockQty > 0 ? `${stockQty} in stock` : "Stock not set",
+      image,
+      art: "art-panel",
+      badge,
+      offer,
+      specs
+    };
+
+    Object.keys(product).forEach((key) => {
+      if (product[key] === "" || (Array.isArray(product[key]) && !product[key].length)) {
+        delete product[key];
+      }
+    });
+
+    imported.push(product);
+  });
+
+  return { imported, skipped };
+}
+
+function loadXlsxLibrary() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+
+  return new Promise((resolve, reject) => {
+    const existingScript = document.querySelector("[data-xlsx-loader]");
+    if (existingScript) {
+      existingScript.addEventListener("load", () => resolve(window.XLSX));
+      existingScript.addEventListener("error", () => reject(new Error("Excel reader could not load. Save the sheet as CSV and upload again.")));
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+    script.async = true;
+    script.dataset.xlsxLoader = "true";
+    script.onload = () => {
+      if (window.XLSX) {
+        resolve(window.XLSX);
+      } else {
+        reject(new Error("Excel reader could not start. Save the sheet as CSV and upload again."));
+      }
+    };
+    script.onerror = () => reject(new Error("Excel reader could not load. Save the sheet as CSV and upload again."));
+    document.head.appendChild(script);
+  });
+}
+
+function renderBulkPreview(message = "") {
+  if (!bulkPreview) return;
+
+  if (!pendingBulkProducts.length) {
+    bulkPreview.innerHTML = `<p>${escapeHtml(message || "No Excel file selected.")}</p>`;
+    if (bulkApplyButton) bulkApplyButton.disabled = true;
+    if (bulkClearButton) bulkClearButton.disabled = true;
+    return;
+  }
+
+  const visibleProducts = pendingBulkProducts.slice(0, 12);
+  bulkPreview.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Brand</th>
+          <th>Category</th>
+          <th>Unit</th>
+          <th>Qty.</th>
+          <th>Rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${visibleProducts.map((product) => `
+          <tr>
+            <td>${escapeHtml(product.title)}</td>
+            <td>${escapeHtml(product.brand || "Shiva Enterprises")}</td>
+            <td>${escapeHtml(product.category || "Electrical")}</td>
+            <td>${escapeHtml(product.unit || "piece")}</td>
+            <td>${escapeHtml(product.stockQty ?? "")}</td>
+            <td>${formatPrice(product.price)}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+    <p>${escapeHtml(message || `${pendingBulkProducts.length} item(s) ready to import.`)}</p>
+  `;
+  if (bulkApplyButton) bulkApplyButton.disabled = false;
+  if (bulkClearButton) bulkClearButton.disabled = false;
+}
+
+function handleBulkRows(rows, fileName) {
+  const { imported, skipped } = rowsToProducts(rows);
+  pendingBulkProducts = imported;
+  const skippedText = skipped ? ` ${skipped} blank row(s) skipped.` : "";
+  renderBulkPreview(`${imported.length} item(s) loaded from ${fileName}.${skippedText}`);
+  setStatus(imported.length ? "Review imported items, then click Add Imported Items." : "No valid item rows found.");
+}
+
+function importBulkFile(file) {
+  const extension = file.name.split(".").pop().toLowerCase();
+  const reader = new FileReader();
+
+  reader.onload = async () => {
+    try {
+      if (extension === "csv") {
+        handleBulkRows(parseCsv(String(reader.result || "")), file.name);
+        return;
+      }
+
+      setStatus("Reading Excel file...");
+      renderBulkPreview("Reading Excel file. Please wait.");
+
+      const XLSX = await loadXlsxLibrary();
+      const workbook = XLSX.read(new Uint8Array(reader.result), { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: false });
+      handleBulkRows(rows, file.name);
+    } catch (error) {
+      pendingBulkProducts = [];
+      renderBulkPreview(error.message || "Could not read uploaded file.");
+      setStatus(error.message || "Could not read uploaded file.");
+    }
+  };
+
+  if (extension === "csv") {
+    reader.readAsText(file);
+  } else {
+    reader.readAsArrayBuffer(file);
+  }
+}
+
+function applyBulkImport() {
+  if (!pendingBulkProducts.length) {
+    setStatus("Upload an Excel or CSV file first.");
+    return;
+  }
+
+  if (bulkModeSelect && bulkModeSelect.value === "replace") {
+    products = structuredClone(pendingBulkProducts);
+  } else {
+    products = [...structuredClone(pendingBulkProducts), ...products];
+  }
+
+  selectedId = products[0] ? products[0].id : "";
+  const count = pendingBulkProducts.length;
+  pendingBulkProducts = [];
+  renderBulkPreview(`${count} imported item(s) added. Click Export products.js for GitHub publishing.`);
+  if (bulkFileInput) bulkFileInput.value = "";
+  persistProducts(`${count} bulk item(s) imported.`);
+}
+
+function clearBulkImport() {
+  pendingBulkProducts = [];
+  if (bulkFileInput) bulkFileInput.value = "";
+  renderBulkPreview("Bulk import cleared.");
+  setStatus("Bulk import cleared.");
+}
+
+function downloadBulkTemplate() {
+  const template = [
+    ["item", "unit", "Qty.", "rate", "brand", "category", "model", "image", "offer", "technical data"],
+    ["LED Bulb 12W Cool White", "piece", "10", "180", "Philips", "Electrical", "12W-CW", "assets/products/led-bulb.jpg", "Up to 40% discount", "Wattage: 12W; Color: Cool White"],
+    ["6A Modular Switch", "piece", "20", "95", "Schneider Electric", "Electrical", "6A-1W", "assets/products/switch.jpg", "Project rate available", "Rating: 6A; Type: 1 way"]
+  ].map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
+  downloadFile("shiva-bulk-upload-template.csv", "text/csv", template);
+  setStatus("Downloaded bulk upload CSV template.");
+}
+
 function resetToPublished() {
   products = structuredClone(publishedProducts);
   selectedId = products[0] ? products[0].id : "";
@@ -407,6 +713,15 @@ importJsonInput.addEventListener("change", (event) => {
   if (file) importJson(file);
   event.target.value = "";
 });
+
+bulkFileInput.addEventListener("change", (event) => {
+  const file = event.target.files && event.target.files[0];
+  if (file) importBulkFile(file);
+});
+
+bulkApplyButton.addEventListener("click", applyBulkImport);
+bulkClearButton.addEventListener("click", clearBulkImport);
+bulkTemplateButton.addEventListener("click", downloadBulkTemplate);
 
 if (window.sessionStorage.getItem(SESSION_KEY) === "yes") {
   loginSection.hidden = true;

@@ -73,6 +73,50 @@
           </div>
         </section>
 
+        <section class="admin-bulk-panel">
+          <div class="admin-bulk-head">
+            <div>
+              <p class="eyebrow">Bulk Upload</p>
+              <h2>Excel Item Import</h2>
+              <p>Upload Excel or CSV with columns: <strong>item</strong>, <strong>unit</strong>, <strong>Qty.</strong>, <strong>rate</strong>. Optional columns: brand, category, model, image, offer, technical data.</p>
+            </div>
+            <button type="button" data-download-bulk-template>Download CSV Template</button>
+          </div>
+          <div class="admin-bulk-controls">
+            <label>
+              Upload File
+              <input type="file" accept=".xlsx,.xls,.csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-bulk-file>
+            </label>
+            <label>
+              Import Mode
+              <select data-bulk-mode>
+                <option value="append">Add to existing inventory</option>
+                <option value="replace">Replace full inventory</option>
+              </select>
+            </label>
+            <label>
+              Default Category
+              <select data-bulk-category>
+                <option>Electrical</option>
+                <option>CCTV</option>
+                <option>Networking</option>
+                <option>Electronics</option>
+                <option>Communication</option>
+                <option>Facility</option>
+              </select>
+            </label>
+            <label>
+              Default Brand
+              <input data-bulk-brand placeholder="Shiva Enterprises">
+            </label>
+            <button class="btn btn-primary" type="button" data-apply-bulk disabled>Add Imported Items</button>
+            <button class="btn btn-secondary" type="button" data-clear-bulk disabled>Clear Import</button>
+          </div>
+          <div class="admin-bulk-preview" data-bulk-preview>
+            <p>No Excel file selected.</p>
+          </div>
+        </section>
+
         <section class="admin-workspace">
           <aside class="admin-list-panel">
             <div class="admin-list-tools">

@@ -72,6 +72,7 @@
 
 .admin-topbar,
 .admin-publish-panel,
+.admin-bulk-panel,
 .admin-workspace,
 .admin-summary {
   width: min(1480px, 100%);
@@ -105,6 +106,7 @@
 
 .admin-summary article,
 .admin-publish-panel,
+.admin-bulk-panel,
 .admin-list-panel,
 .admin-editor-panel {
   border: 1px solid #e2eaf0;
@@ -150,6 +152,30 @@
   color: #657384;
 }
 
+.admin-bulk-panel {
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.admin-bulk-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.admin-bulk-head h2 {
+  margin: 0 0 6px;
+  font-size: 1.2rem;
+}
+
+.admin-bulk-head p {
+  margin: 0;
+  color: #657384;
+}
+
+.admin-bulk-head button,
 .admin-file-actions button,
 .admin-import-button,
 .admin-editor-actions button {
@@ -162,6 +188,76 @@
   font: inherit;
   font-weight: 800;
   cursor: pointer;
+}
+
+.admin-bulk-controls {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.3fr) repeat(3, minmax(150px, 1fr)) auto auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.admin-bulk-controls label {
+  display: grid;
+  gap: 7px;
+  font-weight: 800;
+  color: #25384c;
+}
+
+.admin-bulk-controls input,
+.admin-bulk-controls select {
+  width: 100%;
+  border: 1px solid #d8e2ea;
+  border-radius: 6px;
+  padding: 12px 13px;
+  font: inherit;
+  background: #fff;
+  color: #17212b;
+}
+
+.admin-bulk-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+.admin-bulk-preview {
+  margin-top: 14px;
+  border: 1px solid #e2eaf0;
+  border-radius: 8px;
+  overflow: auto;
+  background: #f8fbfd;
+}
+
+.admin-bulk-preview p {
+  margin: 0;
+  padding: 14px;
+  color: #657384;
+  font-weight: 800;
+}
+
+.admin-bulk-preview table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+
+.admin-bulk-preview th,
+.admin-bulk-preview td {
+  padding: 11px 12px;
+  border-bottom: 1px solid #e2eaf0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.admin-bulk-preview th {
+  background: #edf8fb;
+  color: var(--blue-dark);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+}
+
+.admin-bulk-preview td {
+  color: #25384c;
 }
 
 .admin-import-button input {
@@ -327,6 +423,7 @@
 @media (max-width: 1100px) {
   .admin-summary,
   .admin-workspace,
+  .admin-bulk-controls,
   .admin-editor-panel {
     grid-template-columns: 1fr;
   }
@@ -344,6 +441,7 @@
 
   .admin-topbar,
   .admin-publish-panel,
+  .admin-bulk-head,
   .admin-editor-head {
     display: grid;
   }
