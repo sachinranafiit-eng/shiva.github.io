@@ -1409,6 +1409,13 @@ h3 {
   line-height: 1.35;
 }
 
+.product-stock {
+  margin: -3px 0 0;
+  color: #0e7180;
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
 .product-specs {
   display: grid;
   gap: 7px;

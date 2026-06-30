@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Shiva Enterprises Admin | Inventory Manager</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="assets/logo.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin.css">
+  </head>
+  <body class="admin-body">
+    <main class="admin-shell">
+      <section class="admin-login" data-admin-login>
+        <div class="admin-login-card">
+          <p class="eyebrow">Shiva Enterprises Admin</p>
+          <h1>Inventory Manager</h1>
+          <p>Add, edit, delete, import and export catalog products for the website.</p>
+          <label>
+            Admin PIN
+            <input type="password" data-admin-pin placeholder="Enter admin PIN">
+          </label>
+          <button class="btn btn-primary" type="button" data-admin-unlock>Open Admin Panel</button>
+          <p class="admin-status" data-login-status></p>
+          <p class="admin-note">Static-site note: this panel is useful for managing product data, but permanent public updates still require uploading the exported files to GitHub.</p>
+        </div>
+      </section>
+
+      <section class="admin-app" data-admin-app hidden>
+        <header class="admin-topbar">
+          <div>
+            <p class="eyebrow">Admin Panel</p>
+            <h1>Item Inventory</h1>
+          </div>
+          <div class="admin-top-actions">
+            <a class="btn btn-secondary" href="index.html">Open Website</a>
+            <button class="btn btn-primary" type="button" data-export-products>Export products.js</button>
+            <button class="btn btn-secondary" type="button" data-admin-lock>Lock</button>
+          </div>
+        </header>
+
+        <div class="admin-summary" aria-label="Inventory summary">
+          <article>
+            <span>Total Items</span>
+            <strong data-total-products>0</strong>
+          </article>
+          <article>
+            <span>Categories</span>
+            <strong data-total-categories>0</strong>
+          </article>
+          <article>
+            <span>Inventory Value</span>
+            <strong data-total-value>Rs. 0</strong>
+          </article>
+          <article>
+            <span>Saved Mode</span>
+            <strong data-save-mode>Published</strong>
+          </article>
+        </div>
+
+        <section class="admin-publish-panel">
+          <div>
+            <h2>How Public Updates Work</h2>
+            <p>Save changes here to preview them in this browser. For permanent public updates, click <strong>Export products.js</strong>, then upload that file to the GitHub repository root. Upload new product images into <strong>assets/products/</strong>.</p>
+          </div>
+          <div class="admin-file-actions">
+            <button type="button" data-export-json>Export Backup JSON</button>
+            <label class="admin-import-button">
+              Import JSON
+              <input type="file" accept="application/json,.json" data-import-json>
+            </label>
+            <button type="button" data-reset-published>Reset to Published Data</button>
+          </div>
+        </section>
+
+        <section class="admin-workspace">
+          <aside class="admin-list-panel">
+            <div class="admin-list-tools">
+              <input type="search" data-admin-search placeholder="Search brand, model, item">
+              <select data-admin-category>
+                <option value="All">All categories</option>
+              </select>
+              <button class="btn btn-primary" type="button" data-new-product>New Item</button>
+            </div>
+            <div class="admin-product-list" data-admin-list></div>
+          </aside>
+
+          <section class="admin-editor-panel">
+            <form data-product-form>
+              <div class="admin-editor-head">
+                <div>
+                  <p class="eyebrow">Edit Item</p>
+                  <h2 data-editor-title>New Inventory Item</h2>
+                </div>
+                <div class="admin-editor-actions">
+                  <button type="button" data-duplicate-product>Duplicate</button>
+                  <button type="button" data-delete-product>Delete</button>
+                </div>
+              </div>
+
+              <div class="admin-form-grid">
+                <label>Product ID<input name="id" placeholder="Auto-generated if blank"></label>
+                <label>Category
+                  <select name="category">
+                    <option>CCTV</option>
+                    <option>Networking</option>
+                    <option>Electrical</option>
+                    <option>Electronics</option>
+                    <option>Communication</option>
+                    <option>Facility</option>
+                  </select>
+                </label>
+                <label>Brand<input name="brand" required placeholder="Schneider Electric"></label>
+                <label>Model<input name="model" placeholder="ENMOD1P"></label>
+                <label class="admin-wide">Item Title<input name="title" required placeholder="Wi-Fi Energy Monitoring Device"></label>
+                <label>Badge<input name="badge" placeholder="Flash Offer"></label>
+                <label>Price<input name="price" type="number" min="0" step="1" required placeholder="16500"></label>
+                <label>Unit<input name="unit" placeholder="piece / meter / setup"></label>
+                <label>Stock Qty<input name="stockQty" type="number" min="0" step="1" placeholder="10"></label>
+                <label>Stock Status<input name="stockStatus" placeholder="In stock / On order"></label>
+                <label class="admin-wide">Price Label<input name="priceLabel" placeholder="Flash offer price: Rs. 16,500 onwards / setup"></label>
+                <label class="admin-wide">Image Path or URL<input name="image" placeholder="assets/products/item-photo.jpg"></label>
+                <label>Visual Fallback
+                  <select name="art">
+                    <option value="art-panel">Panel</option>
+                    <option value="art-dome">Dome Camera</option>
+                    <option value="art-bullet">Bullet Camera</option>
+                    <option value="art-recorder">Recorder</option>
+                    <option value="art-router">Router</option>
+                    <option value="art-switch">Switch</option>
+                    <option value="art-cable">Cable</option>
+                    <option value="art-hdd">HDD</option>
+                    <option value="art-epabx">EPABX</option>
+                    <option value="art-ups">UPS</option>
+                  </select>
+                </label>
+                <label>Video URL<input name="videoUrl" placeholder="https://youtube.com/..."></label>
+                <label class="admin-wide">Offer Text<textarea name="offer" rows="3" placeholder="Offer details shown on product card"></textarea></label>
+                <label class="admin-wide">Technical Data<textarea name="specs" rows="6" placeholder="One technical point per line"></textarea></label>
+              </div>
+
+              <div class="admin-save-row">
+                <button class="btn btn-primary btn-large" type="submit">Save Item</button>
+                <button class="btn btn-secondary btn-large" type="button" data-clear-form>Clear Form</button>
+                <p class="admin-status" data-admin-status role="status"></p>
+              </div>
+            </form>
+
+            <aside class="admin-preview">
+              <p class="eyebrow">Live Preview</p>
+              <div data-admin-preview></div>
+            </aside>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script src="products.js"></script>
+    <script src="admin.js"></script>
+  </body>
+</html>
