@@ -118,6 +118,16 @@ gunicorn --chdir backend config.wsgi:application --bind 0.0.0.0:$PORT
 
 Set `DJANGO_DEBUG=false`, a random `DJANGO_SECRET_KEY`, `DATABASE_URL=postgresql://...`, `DJANGO_ALLOWED_HOSTS=api.example.com`, `CORS_ALLOWED_ORIGINS=https://sachinranafiit-eng.github.io`, and `CSRF_TRUSTED_ORIGINS=https://api.example.com`. Terminate TLS at the host/proxy and forward `X-Forwarded-Proto: https`. Configure a durable `backend/media/` volume or replace Django's file storage with an object-storage backend before accepting production photos. Back up PostgreSQL and uploads.
 
+### Render setup for this repository
+
+The root [`render.yaml`](render.yaml) declares a Django web service, a PostgreSQL database, and a persistent media disk in Singapore. **These are paid Render resources**; review the displayed cost before applying the Blueprint. No account or service is created merely by committing the file.
+
+1. In Render, choose **New → Blueprint**, connect `sachinranafiit-eng/shiva.github.io`, review the plan and click **Apply** if the cost is acceptable. Render generates the Django secret, supplies the database URL, runs migrations and seeds the catalog. It sets the API hostname automatically in Django through `RENDER_EXTERNAL_HOSTNAME`.
+2. Open the new API URL and confirm `/api/config/` and `/api/docs/` load over HTTPS. Use Render's shell to run `python backend/manage.py createsuperuser`; choose a unique password there. The local development superuser does not transfer to PostgreSQL.
+3. In GitHub **Settings → Secrets and variables → Actions → Variables**, add `PORTAL_API_URL` with value `https://YOUR-RENDER-HOST.onrender.com/api` (no trailing slash). Run the **Deploy Shiva Enterprises site and portal** workflow, then register a test customer on GitHub Pages.
+
+The API rejects production startup without PostgreSQL and a secret key. CORS permits the GitHub Pages origin. Do not add `DATABASE_URL`, admin passwords, or payment credentials to Git. The media disk preserves uploads; arrange secure media delivery before relying on customer/job photos in production.
+
 For SMTP, set `EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_TLS`, and `DEFAULT_FROM_EMAIL`. SMS/WhatsApp provider names and payment gateway settings are only configuration markers currently; no delivery or online charge is attempted. The API `/api/config/` reports what is configured. Until gateway integration and real credentials are provided, only cash and pay-after-service records are supported.
 
 ## Verification

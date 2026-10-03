@@ -1,0 +1,34 @@
+# Applying this Blueprint creates paid Render resources. Review the plan and cost in Render first.
+services:
+  - type: web
+    name: shiva-enterprises-api
+    runtime: python
+    plan: 0.5c-512mb
+    region: singapore
+    buildCommand: pip install -r backend/requirements.txt && python backend/manage.py collectstatic --noinput
+    preDeployCommand: python backend/manage.py migrate && python backend/manage.py seed_catalog
+    startCommand: gunicorn --chdir backend config.wsgi:application --bind 0.0.0.0:$PORT
+    healthCheckPath: /api/config/
+    disk:
+      name: shiva-media
+      mountPath: /opt/render/project/src/backend/media
+      sizeGB: 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.11
+      - key: DJANGO_DEBUG
+        value: 'false'
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: shiva-enterprises-db
+          property: connectionString
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://sachinranafiit-eng.github.io
+
+databases:
+  - name: shiva-enterprises-db
+    plan: 0.1c-256mb
+    region: singapore
+    ipAllowList: []
