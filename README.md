@@ -96,6 +96,15 @@ Service prices are starting amounts. The customer sees visit, labour, each mater
 3. Push to `main` or run the **Deploy Shiva Enterprises site and portal** workflow manually. It builds the portal with base `/shiva.github.io/portal/`, copies the existing marketing site and assets, and deploys `_site`.
 4. Verify `https://sachinranafiit-eng.github.io/shiva.github.io/` and `/shiva.github.io/portal/`. If `PORTAL_API_URL` is unset, the portal clearly reports that online booking is unavailable; it does not submit a fake booking.
 
+## Android and iPhone installation
+
+Open `https://sachinranafiit-eng.github.io/shiva.github.io/portal/?install=1` on the phone. The marketing site and portal both link to this page. The portal includes a web app manifest, Shiva icon and service worker scoped to `/shiva.github.io/portal/`.
+
+- **Android:** Download the signed APK from `https://sachinranafiit-eng.github.io/shiva.github.io/downloads/shiva-enterprises-android.apk`, open it and follow Android's installation prompt. The APK is a WebView wrapper around the live portal. Chrome's **Install app** or **Add to Home screen** is also available for the website.
+- **iPhone:** In Safari, tap **Share → Add to Home Screen**, enable **Open as Web App** if shown, then tap **Add**.
+
+The Android source and `android/build-apk.sh` are included. Rebuild on macOS with Android SDK platform 35, Build Tools 36.1.0, Android Studio's JDK and `bash android/build-apk.sh`; the script signs and verifies `downloads/shiva-enterprises-android.apk`. It creates `.local-signing/shiva-release.jks` and `.local-signing/password` outside Git. **Back up both files privately:** future APK updates with the same package name must use the same key. Do not commit them. The APK is directly downloadable and not a Play Store listing. There is no IPA or App Store listing; iPhone uses the installed website. Store distribution needs the owner's developer accounts and review. The service worker caches the app shell and static assets; booking and material actions still require internet and the separately deployed API. It does not cache API responses or queue offline submissions.
+
 ## Production API and database
 
 Deploy `backend/` to a Python-capable host with Python 3.11+, persistent PostgreSQL, HTTPS and persistent upload storage. Example start commands from the repository root:

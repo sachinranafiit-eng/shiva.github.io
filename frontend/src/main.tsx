@@ -3,13 +3,16 @@ import { createRoot } from 'react-dom/client'
 import { API_URL, api, all, money, type Address, type AvailabilitySlot, type Booking, type Estimate, type Offer, type Product, type Service, type ServiceArea, type User } from './api'
 import './style.css'
 
-type Page = 'home' | 'services' | 'materials' | 'book' | 'bookings' | 'account' | 'technician' | 'admin'
+type Page = 'home' | 'services' | 'materials' | 'book' | 'bookings' | 'account' | 'technician' | 'admin' | 'install'
+type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }
 const categories = ['electrical', 'networking', 'cctv']
 const labels: Record<string, string> = { electrical: 'Electrical', networking: 'Networking', cctv: 'CCTV' }
 const icons: Record<string, string> = { electrical: '⚡', networking: '◎', cctv: '◉' }
 
 function App() {
-  const [page, setPage] = useState<Page>('home')
+  const [page, setPage] = useState<Page>(new URLSearchParams(window.location.search).has('install') ? 'install' : 'home')
+  const [installPrompt, setInstallPrompt] = useState<InstallEvent | null>(null)
+  const [isInstalled, setIsInstalled] = useState(window.matchMedia('(display-mode: standalone)').matches || ('standalone' in navigator && Boolean((navigator as Navigator & { standalone?: boolean }).standalone)))
   const [user, setUser] = useState<User | null>(null)
   const [services, setServices] = useState<Service[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -44,6 +47,14 @@ function App() {
     }
   }
   useEffect(() => { refresh().catch(e => setMessage(e.message)) }, [])
+  useEffect(() => {
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {})
+    const ready = (event: Event) => { event.preventDefault(); setInstallPrompt(event as InstallEvent) }
+    const installed = () => { setInstallPrompt(null); setIsInstalled(true) }
+    window.addEventListener('beforeinstallprompt', ready)
+    window.addEventListener('appinstalled', installed)
+    return () => { window.removeEventListener('beforeinstallprompt', ready); window.removeEventListener('appinstalled', installed) }
+  }, [])
   useEffect(() => { if (API_URL) all<AvailabilitySlot>(dateFilter ? `/availability/?date=${dateFilter}` : '/availability/').then(setAvailability).catch(e => setMessage(e.message)) }, [dateFilter])
   function navigate(to: Page) { setPage(to); setMessage(''); window.scrollTo(0, 0) }
   function book(service?: number) { if (service) setSelectedService(service); navigate(user ? 'book' : 'account') }
@@ -64,10 +75,11 @@ function App() {
   const estimateTotal = (e: Estimate) => e.lines.reduce((sum, l) => sum + Number(l.unit_price) * l.quantity * (1 + Number(l.tax_rate) / 100), 0)
 
   return <>
-    <header className="site-nav"><div className="nav-inner"><a className="brand" href={import.meta.env.BASE_URL.replace(/portal\/?$/, "")} aria-label="Shiva Enterprises main website"><img src={`${import.meta.env.BASE_URL}assets/logo.png`} alt=""/><span><strong>SHIVA ENTERPRISES</strong><small>DEHRADUN</small></span></a><nav aria-label="Portal navigation"><button onClick={() => navigate('services')}>Services</button><button onClick={() => navigate('materials')}>Materials</button><button onClick={() => navigate('bookings')}>My bookings</button>{user?.role === 'technician' && <button onClick={() => navigate('technician')}>Technician</button>}{user?.role === 'staff' && <button onClick={() => navigate('admin')}>Dashboard</button>}</nav><div className="nav-actions">{user ? <button className="link-button" onClick={signout}>Sign out</button> : <button className="link-button" onClick={() => navigate('account')}>Sign in</button>}<button className="primary" onClick={() => book()}>Book service</button></div></div></header>
+    <header className="site-nav"><div className="nav-inner"><a className="brand" href={import.meta.env.BASE_URL.replace(/portal\/?$/, "")} aria-label="Shiva Enterprises main website"><img src={`${import.meta.env.BASE_URL}assets/logo.png`} alt=""/><span><strong>SHIVA ENTERPRISES</strong><small>DEHRADUN</small></span></a><nav aria-label="Portal navigation"><button onClick={() => navigate('services')}>Services</button><button onClick={() => navigate('materials')}>Materials</button><button onClick={() => navigate('bookings')}>My bookings</button><button onClick={() => navigate('install')}>Mobile app</button>{user?.role === 'technician' && <button onClick={() => navigate('technician')}>Technician</button>}{user?.role === 'staff' && <button onClick={() => navigate('admin')}>Dashboard</button>}</nav><div className="nav-actions">{user ? <button className="link-button" onClick={signout}>Sign out</button> : <button className="link-button" onClick={() => navigate('account')}>Sign in</button>}<button className="primary" onClick={() => book()}>Book service</button></div></div></header>
     {message && <div className="notice" role="status">{message}<button onClick={() => setMessage('')} aria-label="Dismiss">×</button></div>}
     {!API_URL && <div className="notice warning">Online booking is awaiting a separately deployed API. Call <a href="tel:+919259599151">+91 9259599151</a> for service now.</div>}
     <main>
+    {page === 'install' && <section className="content-section install-page"><div className="install-heading"><img src={`${import.meta.env.BASE_URL}assets/app-icon-192.png`} alt="Shiva Enterprises app icon"/><div><small>SHIVA ENTERPRISES ON MOBILE</small><h1>Keep service booking on your home screen.</h1><p>Download the Android app or install the website on iPhone. Both open the Shiva Enterprises booking portal.</p></div></div><div className="install-grid"><article><span className="platform-icon">◆</span><h2>Android APK</h2><p>Download the signed Android app directly from our website, then open the file on your phone. Android may ask you to allow installation from your browser.</p><a className="primary" href="/shiva.github.io/downloads/shiva-enterprises-android.apk" download>Download Android APK</a><p className="install-hint">You can also install the website from Chrome’s menu if you prefer.</p>{!isInstalled && installPrompt && <button className="secondary" onClick={async () => { await installPrompt.prompt(); await installPrompt.userChoice; setInstallPrompt(null) }}>Install website on Android</button>}</article><article><span className="platform-icon">●</span><h2>iPhone web app</h2><p>Open this page in <strong>Safari</strong>, tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>. Turn on <strong>Open as Web App</strong> if shown, then tap <strong>Add</strong>.</p><a className="secondary" href={`${import.meta.env.BASE_URL}?install=1`}>Open iPhone install page</a></article></div><p className="install-note">The Android APK opens the live portal. No Play Store or App Store listing exists yet. Booking and materials need the separately hosted API and an internet connection.</p></section>}
     {page === 'home' && <>
       <section className="hero"><div className="hero-copy"><h1>Electrical, networking and CCTV services in Dehradun</h1><p>Professional installation, repair and maintenance for homes, offices and commercial spaces.</p><div className="hero-actions"><button className="primary large" onClick={() => book()}>Book a service <span>→</span></button><a className="secondary large" href="tel:+919259599151">Call +91 9259599151</a></div><div className="hero-points"><span>✓ Skilled technicians</span><span>✓ Clear estimates</span><span>✓ Genuine materials</span></div></div><div className="hero-photo" role="img" aria-label="Shiva Enterprises technical service"><img src={`${import.meta.env.BASE_URL}assets/hero-technician.png`} alt="Electrical monitoring equipment"/></div></section>
       <section className="quick-start"><div className="category-row">{categories.map(c => <button key={c} className={category === c ? 'category active' : 'category'} onClick={() => { setCategory(c); navigate('services') }}><span>{icons[c]}</span><strong>{labels[c]} services</strong><small>{c === 'electrical' ? 'Installation, repair, inspection' : c === 'networking' ? 'LAN, Wi-Fi, structured cabling' : 'Installation, repair, AMC'}</small><b>→</b></button>)}</div><h2>Choose how you want to book</h2><div className="mode-row"><button className={mode === 'service_only' ? 'mode active' : 'mode'} onClick={() => setMode('service_only')}><strong>Service only</strong><span>Have your own materials? Book skilled labour.</span></button><button className={mode === 'with_materials' ? 'mode active' : 'mode'} onClick={() => setMode('with_materials')}><strong>Service + materials</strong><span>Choose products or approve a technician estimate.</span></button><button className="primary" onClick={() => book()}>Continue to booking →</button></div></section>

@@ -36,6 +36,7 @@ jobs:
           mkdir -p _site/portal
           cp index.html styles.css script.js products.js robots.txt sitemap.xml _site/
           cp -R assets _site/
+          cp -R downloads _site/
           find . -maxdepth 1 -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.svg' \) -exec cp {} _site/ \;
           cp -R frontend/dist/. _site/portal/
           touch _site/.nojekyll
