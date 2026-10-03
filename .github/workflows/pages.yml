@@ -1,0 +1,54 @@
+name: Deploy Shiva Enterprises site and portal
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Build portal
+        working-directory: frontend
+        env:
+          VITE_API_URL: ${{ vars.PORTAL_API_URL }}
+          VITE_BASE_PATH: /shiva.github.io/portal/
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+      - name: Assemble public site
+        run: |
+          mkdir -p _site/portal
+          cp index.html styles.css script.js products.js robots.txt sitemap.xml _site/
+          cp -R assets _site/
+          find . -maxdepth 1 -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.svg' \) -exec cp {} _site/ \;
+          cp -R frontend/dist/. _site/portal/
+          touch _site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
