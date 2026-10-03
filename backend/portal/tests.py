@@ -3,12 +3,29 @@ from decimal import Decimal
 from io import BytesIO
 from PIL import Image
 from django.contrib.auth.models import User
+from django.core.management import call_command
+from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 from .models import Address, Booking, Estimate, Offer, Product, Profile, Service, ServiceArea, AvailabilitySlot, StockMovement, JobPhoto, Invoice
 from .serializers import InvoiceSerializer
+from .management.commands.seed_catalog import MATCHED_RATES
+
+class ComparableRateTests(TestCase):
+    def test_matched_starting_totals_stay_at_least_five_percent_lower(self):
+        call_command('seed_catalog', verbosity=0)
+        for category, name, _, urban_company_price, _ in MATCHED_RATES:
+            service = Service.objects.get(category=category, name=name)
+            total = (service.labour_price + service.visit_price) * (Decimal('1') + service.tax_rate / 100)
+            self.assertEqual(service.visit_price, 0)
+            self.assertLessEqual(total, Decimal(urban_company_price) * Decimal('0.95'), name)
+        service.labour_price = Decimal('123.45')
+        service.save(update_fields=['labour_price'])
+        call_command('seed_catalog', verbosity=0)
+        service.refresh_from_db()
+        self.assertEqual(service.labour_price, Decimal('123.45'))
 
 class PortalFlowTests(APITestCase):
     def setUp(self):
