@@ -10,3 +10,4 @@ frontend/*.tsbuildinfo
 .DS_Store
 .local-signing/
 android/build/
+downloads/*.idsig

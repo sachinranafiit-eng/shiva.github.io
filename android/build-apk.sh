@@ -28,6 +28,6 @@ fi
 "$TOOLS/d8" --lib "$PLATFORM" --min-api 24 --output "$OUT" "$OUT"/classes/com/shivaenterprises/services/*.class
 (cd "$OUT" && zip -q -u unsigned.apk classes.dex)
 "$TOOLS/zipalign" -f -p 4 "$OUT/unsigned.apk" "$OUT/aligned.apk"
-"$TOOLS/apksigner" sign --ks "$SIGNING/shiva-release.jks" --ks-key-alias shiva --ks-pass env:SHIVA_SIGNING_PASSWORD --key-pass env:SHIVA_SIGNING_PASSWORD --out "$ROOT/downloads/shiva-enterprises-android.apk" "$OUT/aligned.apk"
+"$TOOLS/apksigner" sign --v4-signing-enabled false --ks "$SIGNING/shiva-release.jks" --ks-key-alias shiva --ks-pass env:SHIVA_SIGNING_PASSWORD --key-pass env:SHIVA_SIGNING_PASSWORD --out "$ROOT/downloads/shiva-enterprises-android.apk" "$OUT/aligned.apk"
 "$TOOLS/apksigner" verify --verbose "$ROOT/downloads/shiva-enterprises-android.apk"
 echo "APK: $ROOT/downloads/shiva-enterprises-android.apk"
