@@ -23,6 +23,10 @@ jobs:
           node-version: '22'
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Check shared catalogue browser file
+        run: |
+          python3 scripts/build_catalog_js.py
+          git diff --exit-code -- products.js
       - name: Build portal
         working-directory: frontend
         env:

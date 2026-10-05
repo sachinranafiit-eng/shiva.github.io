@@ -1,4 +1,4 @@
-window.SHIVA_CATALOG_PRODUCTS = [
+[
   {
     "id": "cp-plus-2mp-dome",
     "brand": "CP Plus",
@@ -889,4 +889,4 @@ window.SHIVA_CATALOG_PRODUCTS = [
       "Queue, IVR and call recording"
     ]
   }
-];
+]

@@ -14,6 +14,30 @@ from .serializers import InvoiceSerializer
 from .management.commands.seed_catalog import MATCHED_RATES
 
 class ComparableRateTests(TestCase):
+    def test_shared_catalog_starts_without_claiming_unverified_stock(self):
+        call_command('seed_catalog', verbosity=0)
+        self.assertEqual(Product.objects.count(), 45)
+        self.assertEqual(StockMovement.objects.count(), 0)
+        camera = Product.objects.get(sku='CP-DOME-2MP')
+        self.assertEqual(camera.price, Decimal('2500'))
+        self.assertEqual(camera.available, 0)
+        camera.price = Decimal('2600')
+        camera.stock = 3
+        camera.save(update_fields=['price', 'stock'])
+        call_command('seed_catalog', verbosity=0)
+        camera.refresh_from_db()
+        self.assertEqual(Product.objects.count(), 45)
+        self.assertEqual(camera.price, Decimal('2600'))
+        self.assertEqual(camera.stock, 3)
+
+    def test_legacy_roll_stock_is_not_relabelled_as_metres(self):
+        roll = Product.objects.create(sku='MOL-CAT6', name='Molex Cat6 cable', category='Networking', unit='roll', price=6999, stock=4)
+        call_command('seed_catalog', verbosity=0)
+        roll.refresh_from_db()
+        self.assertEqual(roll.unit, 'roll')
+        self.assertEqual(roll.stock, 4)
+        self.assertTrue(Product.objects.filter(sku='MOLEX-CAT6-CABLE', unit='meter', stock=0).exists())
+
     def test_matched_starting_totals_stay_at_least_five_percent_lower(self):
         call_command('seed_catalog', verbosity=0)
         for category, name, _, urban_company_price, _ in MATCHED_RATES:

@@ -1,0 +1,8 @@
+[
+  {"category":"electrical","name":"Regular ceiling fan installation","label":"Regular ceiling fan installation","labour_price":"71.65","urban_company_price":89,"scope":"One regular ceiling fan installed at an existing point."},
+  {"category":"electrical","name":"Switch replacement or installation","label":"Switch replacement / installation","labour_price":"39.44","urban_company_price":49,"scope":"One standard switch at an existing point."},
+  {"category":"electrical","name":"Socket replacement or installation","label":"Socket replacement / installation","labour_price":"47.50","urban_company_price":59,"scope":"One standard socket at an existing point."},
+  {"category":"electrical","name":"Tube light replacement or installation","label":"Tube light replacement / installation","labour_price":"63.60","urban_company_price":79,"scope":"One tube light at an existing point."},
+  {"category":"electrical","name":"MCB or fuse replacement","label":"MCB or fuse replacement","labour_price":"95.80","urban_company_price":119,"scope":"One MCB or fuse at an existing board."},
+  {"category":"cctv","name":"Wireless CCTV camera installation","label":"Wireless CCTV installation","labour_price":"200.46","urban_company_price":249,"scope":"One wireless camera installation and basic connection at an existing power point."}
+]

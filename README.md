@@ -2,6 +2,8 @@
 
 The original Shiva Enterprises marketing site remains at the repository root. The React/TypeScript booking portal is in `frontend/` and publishes at `/shiva.github.io/portal/`. The Django REST API is in `backend/` and runs on a separate Python host. GitHub Pages serves static files only.
 
+The main site's `#pricing` section links to the portal's service and material views, and the portal links back to the full pricing page. `catalog/products.json` is the shared source for the 45 published product descriptions, images and starting prices. Run `python3 scripts/build_catalog_js.py` after editing it to refresh the main site's `products.js`; the Pages workflow checks they match. The portal shows this catalogue for browsing even before the API is deployed. Only the Django API supplies real inventory availability and accepts material bookings. `seed_catalog` creates any missing products with **zero stock**; staff must record actual receipts before customers can reserve them. Rerunning it preserves edited prices and stock. Older demo cable rows remain separate from the new per-metre catalogue rows so their existing quantities are not reinterpreted.
+
 The deployment excludes the old `admin.html` and `admin.js`: they used a JavaScript PIN and browser storage, which cannot protect real bookings or inventory. Use authenticated Django admin at `https://YOUR_API_HOST/admin/` for staff management.
 
 ## Requirements and versions
@@ -83,7 +85,7 @@ The superuser account created by `createsuperuser` opens the **Shiva Enterprises
 
 ### Comparable Dehradun starting rates
 
-Six narrowly matched basic services use published [Urban Company Dehradun electrician starting rates](https://www.urbancompany.com/dehradun-electricians) checked 3 October 2026. Shiva's starting **labour plus 18% service tax**, with a zero visit fee, is at least 5% below each matching listed rate. Materials and extra work are quoted separately. The root marketing page and portal landing page show the dated comparison; the API catalogue contains bookable versions of those services. The comparison does **not** cover networking, wired CCTV, maintenance or project work, for which no matching public rate was verified. Urban Company's prices can change. Existing custom Shiva prices are preserved. `seed_catalog` adds missing matched services and never overwrites staff-edited rates; update the two static comparison panels if staff change those rates later.
+Six narrowly matched basic services use published [Urban Company Dehradun electrician starting rates](https://www.urbancompany.com/dehradun-electricians) checked 5 October 2026. Shiva's starting **labour plus 18% service tax**, with a zero visit fee, is at least 5% below each matching listed rate. Materials and extra work are quoted separately. `catalog/comparable-services.json` supplies the portal's dated comparison, offline service preview, and backend seed prices. The root marketing page shows the same comparison. The comparison does **not** cover networking, wired CCTV, maintenance or project work, for which no matching public rate was verified. Urban Company's prices can change. Existing custom Shiva prices are preserved. `seed_catalog` adds missing matched services and never overwrites staff-edited rates; update the static comparison if staff change those rates later.
 
 ## API and roles
 
