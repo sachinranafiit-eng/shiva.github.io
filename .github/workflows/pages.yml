@@ -30,7 +30,7 @@ jobs:
       - name: Build portal
         working-directory: frontend
         env:
-          VITE_API_URL: ${{ vars.PORTAL_API_URL }}
+          VITE_API_URL: https://shiva-enterprises-api.onrender.com/api
           VITE_BASE_PATH: /shiva.github.io/portal/
         run: |
           pnpm install --frozen-lockfile
