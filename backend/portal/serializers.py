@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.contrib.auth.password_validation import validate_password
@@ -143,7 +144,7 @@ class BookingSerializer(serializers.ModelSerializer):
         now = timezone.now()
         if value <= now:
             raise serializers.ValidationError('Choose a future date and time.')
-        if value > now + timezone.timedelta(days=90):
+        if value > now + timedelta(days=90):
             raise serializers.ValidationError('Bookings can be requested up to 90 days ahead.')
         return value
     def validate(self, attrs):
