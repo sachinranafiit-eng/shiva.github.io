@@ -11,16 +11,21 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 from .models import Address, Booking, Estimate, Offer, Product, Profile, Service, ServiceArea, AvailabilitySlot, StockMovement, JobPhoto, Invoice
 from .serializers import InvoiceSerializer
-from .management.commands.seed_catalog import MATCHED_RATES
 
-class ComparableRateTests(TestCase):
-    def test_shared_catalog_starts_without_claiming_unverified_stock(self):
+class CatalogSeedTests(TestCase):
+    def test_shared_catalog_starts_without_claiming_stock_or_tax(self):
         call_command('seed_catalog', verbosity=0)
         self.assertEqual(Product.objects.count(), 45)
+        self.assertEqual(Service.objects.count(), 9)
         self.assertEqual(StockMovement.objects.count(), 0)
         camera = Product.objects.get(sku='CP-DOME-2MP')
         self.assertEqual(camera.price, Decimal('2500'))
         self.assertEqual(camera.available, 0)
+        self.assertEqual(camera.tax_rate, Decimal('0'))
+        self.assertFalse(Service.objects.filter(description__icontains='Urban Company').exists())
+        self.assertFalse(Service.objects.filter(description__icontains='5%').exists())
+        self.assertTrue(all(s.tax_rate == 0 for s in Service.objects.all()))
+
         camera.price = Decimal('2600')
         camera.stock = 3
         camera.save(update_fields=['price', 'stock'])
@@ -38,18 +43,6 @@ class ComparableRateTests(TestCase):
         self.assertEqual(roll.stock, 4)
         self.assertTrue(Product.objects.filter(sku='MOLEX-CAT6-CABLE', unit='meter', stock=0).exists())
 
-    def test_matched_starting_totals_stay_at_least_five_percent_lower(self):
-        call_command('seed_catalog', verbosity=0)
-        for category, name, _, urban_company_price, _ in MATCHED_RATES:
-            service = Service.objects.get(category=category, name=name)
-            total = (service.labour_price + service.visit_price) * (Decimal('1') + service.tax_rate / 100)
-            self.assertEqual(service.visit_price, 0)
-            self.assertLessEqual(total, Decimal(urban_company_price) * Decimal('0.95'), name)
-        service.labour_price = Decimal('123.45')
-        service.save(update_fields=['labour_price'])
-        call_command('seed_catalog', verbosity=0)
-        service.refresh_from_db()
-        self.assertEqual(service.labour_price, Decimal('123.45'))
 
 class PortalFlowTests(APITestCase):
     def setUp(self):
@@ -133,7 +126,7 @@ class PortalFlowTests(APITestCase):
         offer.value = 50; offer.save()
         charges = InvoiceSerializer(Invoice.objects.create(booking=booking)).data['charges']
         self.assertEqual(Decimal(charges['discount']), Decimal('50'))
-        self.assertEqual(Decimal(charges['total']), Decimal('649'))
+        self.assertEqual(Decimal(charges['total']), Decimal('550'))
 
     def test_only_assigned_technician_can_upload_job_photo(self):
         def photo():
@@ -162,3 +155,93 @@ class PortalFlowTests(APITestCase):
         self.assertEqual(self.client.post('/api/bookings/', data).status_code, 201)
         self.assertEqual(self.client.post('/api/bookings/', data).status_code, 400)
         self.assertEqual(self.client.get(f'/api/availability/?service={self.service.id}').data['results'][0]['remaining'], 0)
+
+class ProductionReadinessFlowTests(APITestCase):
+    def setUp(self):
+        self.staff = User.objects.create_user('ops', password='OpsPass!2026', is_staff=True)
+        self.tech = User.objects.create_user('fieldtech', password='TechPass!2026')
+        Profile.objects.create(user=self.staff, role='staff', phone='9259599151')
+        Profile.objects.create(user=self.tech, role='technician', phone='9876543210')
+        self.service = Service.objects.create(name='Electrical inspection', category='electrical', labour_price=500, visit_price=100, tax_rate=0)
+        area = ServiceArea.objects.create(name='Dehradun', city='Dehradun')
+        area.services.add(self.service)
+
+    def auth(self, user):
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {Token.objects.get_or_create(user=user)[0].key}')
+
+    def test_health_endpoint_is_public(self):
+        response = self.client.get('/api/health/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['status'], 'ok')
+
+    def test_registration_requires_contact_phone(self):
+        response = self.client.post('/api/auth/register/', {
+            'username': 'no-phone',
+            'first_name': 'Test',
+            'email': 'nophone@example.com',
+            'password': 'StrongPass!2026',
+        }, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('phone', response.data)
+
+    def test_customer_to_admin_to_technician_to_invoice_flow(self):
+        register = self.client.post('/api/auth/register/', {
+            'username': 'realcustomer',
+            'first_name': 'Ravi',
+            'last_name': 'Kumar',
+            'email': 'ravi@example.com',
+            'phone': '+91 98100 12345',
+            'password': 'StrongPass!2026',
+        }, format='json')
+        self.assertEqual(register.status_code, 201)
+        token = register.data['token']
+        self.assertEqual(register.data['user']['phone'], '+919810012345')
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+
+        address = self.client.post('/api/addresses/', {
+            'label': 'Home', 'line': 'Rajpur Road', 'city': 'Dehradun', 'postal_code': '248001'
+        }, format='json')
+        self.assertEqual(address.status_code, 201)
+
+        booking = self.client.post('/api/bookings/', {
+            'service': self.service.id,
+            'address': address.data['id'],
+            'issue': 'Please inspect intermittent power tripping in the house.',
+            'preferred_at': (timezone.now() + timedelta(days=2)).isoformat(),
+            'mode': 'service_only',
+            'urgency': 'standard',
+        }, format='json')
+        self.assertEqual(booking.status_code, 201)
+        booking_id = booking.data['id']
+
+        self.auth(self.staff)
+        dashboard = self.client.get('/api/dashboard/')
+        self.assertEqual(dashboard.status_code, 200)
+        self.assertEqual(dashboard.data['bookings'], 1)
+        assigned = self.client.post(f'/api/bookings/{booking_id}/assign/', {'technician': self.tech.id}, format='json')
+        self.assertEqual(assigned.status_code, 200)
+        self.assertEqual(assigned.data['status'], 'Assigned')
+
+        self.auth(self.tech)
+        self.assertEqual(self.client.post(f'/api/bookings/{booking_id}/transition/', {'status': 'Accepted'}, format='json').status_code, 200)
+        self.assertEqual(self.client.post(f'/api/bookings/{booking_id}/transition/', {'status': 'In Progress'}, format='json').status_code, 200)
+        work = self.client.post(f'/api/bookings/{booking_id}/update_work/', {
+            'diagnosis': 'Loose termination found in the distribution board.',
+            'job_notes': 'Termination corrected and circuit checked.',
+            'labour_charge': '600.00',
+        }, format='json')
+        self.assertEqual(work.status_code, 200)
+        complete = self.client.post(f'/api/bookings/{booking_id}/transition/', {'status': 'Completed'}, format='json')
+        self.assertEqual(complete.status_code, 200)
+
+        self.auth(self.staff)
+        invoice = self.client.post('/api/invoices/generate/', {'booking': booking_id}, format='json')
+        self.assertEqual(invoice.status_code, 200)
+        self.assertEqual(Decimal(invoice.data['charges']['total']), Decimal('700'))
+        paid = self.client.post(f"/api/invoices/{invoice.data['id']}/record_payment/", {'payment_method': 'cash'}, format='json')
+        self.assertEqual(paid.status_code, 200)
+
+        customer = User.objects.get(username='realcustomer')
+        self.auth(customer)
+        feedback = self.client.post('/api/feedback/', {'booking': booking_id, 'rating': 5, 'comment': 'Work completed.'}, format='json')
+        self.assertEqual(feedback.status_code, 201)
