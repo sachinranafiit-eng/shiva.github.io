@@ -24,3 +24,7 @@
 .legal-grid p,.legal-note{color:#596f89;line-height:1.65;margin:0}
 .legal-note{margin-top:22px;padding:16px;border-left:3px solid #0755ba;background:#f2f7fd}
 @media(max-width:650px){.legal-grid{grid-template-columns:1fr}.inquiry-page .form-intro .secondary{width:100%}}
+
+/* Current compliance/clarity update */
+.pricing-actions{display:flex;gap:12px;flex-wrap:wrap}
+@media(max-width:650px){.pricing-actions{flex-direction:column}.pricing-actions .primary,.pricing-actions .secondary{width:100%}}
