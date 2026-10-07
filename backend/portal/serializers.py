@@ -1,17 +1,30 @@
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.contrib.auth.password_validation import validate_password
+import re
 from rest_framework import serializers
 from .models import Profile, Address, Service, ServiceArea, AvailabilitySlot, Offer, Product, Booking, Estimate, EstimateLine, StockMovement, Activity, JobPhoto, Invoice, Feedback
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
-    phone = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    email = serializers.EmailField(required=True, allow_blank=False)
+    phone = serializers.CharField(write_only=True, required=True, allow_blank=False)
+    def validate_email(self, value):
+        value = value.strip().lower()
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError('An account with this email already exists.')
+        return value
+    def validate_phone(self, value):
+        digits = re.sub(r'\D', '', value)
+        if len(digits) < 10 or len(digits) > 15:
+            raise serializers.ValidationError('Enter a valid phone number with 10 to 15 digits.')
+        return ('+' if value.strip().startswith('+') else '') + digits
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'phone']
     def create(self, data):
-        phone = data.pop('phone', '')
+        phone = data.pop('phone')
+        data['email'] = data['email'].strip().lower()
         user = User.objects.create_user(**data)
         Profile.objects.create(user=user, phone=phone)
         return user
@@ -29,6 +42,11 @@ class UserSerializer(serializers.ModelSerializer):
         return getattr(getattr(user, 'profile', None), 'phone', '')
 
 class AddressSerializer(serializers.ModelSerializer):
+    def validate_postal_code(self, value):
+        value = value.strip()
+        if not re.fullmatch(r'\d{6}', value):
+            raise serializers.ValidationError('Enter a valid 6-digit PIN code.')
+        return value
     class Meta:
         model = Address
         fields = ['id', 'label', 'line', 'city', 'postal_code']
@@ -94,6 +112,7 @@ class JobPhotoSerializer(serializers.ModelSerializer):
         return value
 
 class BookingSerializer(serializers.ModelSerializer):
+    issue = serializers.CharField(min_length=10, max_length=2000)
     activity = ActivitySerializer(many=True, read_only=True)
     job_photos = JobPhotoSerializer(many=True, read_only=True)
     estimates = EstimateSerializer(many=True, read_only=True)
@@ -121,8 +140,11 @@ class BookingSerializer(serializers.ModelSerializer):
         return value
     def validate_preferred_at(self, value):
         from django.utils import timezone
-        if value <= timezone.now():
+        now = timezone.now()
+        if value <= now:
             raise serializers.ValidationError('Choose a future date and time.')
+        if value > now + timezone.timedelta(days=90):
+            raise serializers.ValidationError('Bookings can be requested up to 90 days ahead.')
         return value
     def validate(self, attrs):
         from django.utils import timezone
