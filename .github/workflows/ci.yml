@@ -1,0 +1,45 @@
+name: Test service portal
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_DEBUG: 'true'
+      DJANGO_SECRET_KEY: ci-only-secret-key-not-for-production
+      DEFAULT_TAX_RATE: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+      - name: Check Django project and migrations
+        run: |
+          python backend/manage.py check
+          python backend/manage.py makemigrations --check --dry-run
+      - name: Run backend tests
+        run: python backend/manage.py test portal.tests
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          VITE_API_URL: https://api.example.invalid/api
+          VITE_BASE_PATH: /shiva.github.io/portal/
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
