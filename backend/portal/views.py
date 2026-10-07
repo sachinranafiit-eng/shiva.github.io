@@ -1,19 +1,20 @@
 from decimal import Decimal
 from django.conf import settings
 from django.contrib.auth import authenticate
-from django.db import transaction
+from django.db import connection, transaction
 from django.db.models import Count, F, Sum
 from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework import serializers as rf_serializers
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.decorators import action, api_view, permission_classes, throttle_classes
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from .models import Address, Service, ServiceArea, AvailabilitySlot, Offer, Product, Booking, Estimate, EstimateLine, StockMovement, Activity, JobPhoto, Invoice, Feedback
 from .serializers import RegisterSerializer, UserSerializer, AddressSerializer, ServiceSerializer, ServiceAreaSerializer, AvailabilitySlotSerializer, OfferSerializer, ProductSerializer, BookingSerializer, EstimateSerializer, StockMovementSerializer, JobPhotoSerializer, FeedbackSerializer, InvoiceSerializer
+from .throttles import BookingCreateThrottle, LoginThrottle, RegisterThrottle
 
 def is_staff(user):
     return user.is_staff
@@ -46,9 +47,19 @@ ConfigResponse = inline_serializer(name='ConfigResponse', fields={'payment_mode'
 def public_config(request):
     return Response({'payment_mode': 'cash or pay after service only; online gateway integration pending', 'email': 'provider settings present; delivery integration pending' if settings.EMAIL_HOST else 'not configured', 'sms': 'provider settings present; delivery integration pending' if settings.SMS_PROVIDER else 'not configured', 'whatsapp': 'provider settings present; delivery integration pending' if settings.WHATSAPP_PROVIDER else 'not configured'})
 
+@extend_schema(responses=inline_serializer(name='HealthResponse', fields={'status': rf_serializers.CharField()}))
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def health(request):
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT 1')
+        cursor.fetchone()
+    return Response({'status': 'ok'})
+
 @extend_schema(request=RegisterSerializer, responses=AuthResponse)
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([RegisterThrottle])
 def register(request):
     serializer = RegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -58,6 +69,7 @@ def register(request):
 @extend_schema(request=AuthRequest, responses=AuthResponse)
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([LoginThrottle])
 def login(request):
     user = authenticate(username=request.data.get('username'), password=request.data.get('password'))
     if not user or not user.is_active:
@@ -164,6 +176,10 @@ class OfferViewSet(viewsets.ReadOnlyModelViewSet):
 
 class BookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
+    def get_throttles(self):
+        if getattr(self, 'action', None) == 'create':
+            return [BookingCreateThrottle()]
+        return super().get_throttles()
     queryset = Booking.objects.all()
     http_method_names = ['get', 'post', 'head', 'options']
     def get_queryset(self):
